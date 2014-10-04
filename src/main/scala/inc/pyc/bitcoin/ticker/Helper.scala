@@ -23,7 +23,7 @@ trait PriceTickerHelper {
    * Creates a price ticker actor 
    */
   def priceTicker(service: BitcoinService.Value) = 
-    context.system.actorOf(Props(classOf[PriceTicker], service), "PriceTicker")
+    context.system.actorOf(Props(classOf[PriceTicker], service), "Ticker")
     
   /**
    * Get current set price.
@@ -33,7 +33,7 @@ trait PriceTickerHelper {
   /**
    * Get current set price.
    */
-  def price: Price = Await.result(priceFuture, 500 millis)
+  def price: Price = Await.result(priceFuture, 1 second)
   
   /**
    * Update price.
@@ -48,6 +48,6 @@ trait PriceTickerHelper {
   /**
    * Change bitcoin service provider.
    */
-  def changeBitcoinService(service: BitcoinService.Value) = 
+  def tickerService(service: BitcoinService.Value) = 
     priceTicker ! ChangeBitcoinService(service)
 }

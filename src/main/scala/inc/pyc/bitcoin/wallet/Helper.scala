@@ -28,7 +28,7 @@ trait WalletHelper {
    * Creates a wallet actor 
    */
   def wallet(service: BitcoinService.Value) = 
-    context.system.actorOf(Props(classOf[Wallet], service), "BitcoinWallet")
+    context.system.actorOf(Props(classOf[Wallet], service), "Wallet")
   
   def initBalance: Unit = 
     wallet ! InitBalance
@@ -66,7 +66,7 @@ trait WalletHelper {
     (wallet ? ValidateAddress(address)).mapTo[AddressValidation]
   
   
-  def changeBitcoinService(service: BitcoinService.Value) = 
+  def walletService(service: BitcoinService.Value) = 
     wallet ! ChangeBitcoinService(service)
     
     
