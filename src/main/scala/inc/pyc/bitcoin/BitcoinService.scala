@@ -34,9 +34,3 @@ object BitcoinService extends Enumeration {
   private def fqcn(serv: BitcoinService) = 
     "inc.pyc.bitcoin.provider."+serv.toString()
 }
-
-
-/**
- * Command to change the bitcoin service provider. 
- */
-case class ChangeBitcoinService(service: BitcoinService.Value)
