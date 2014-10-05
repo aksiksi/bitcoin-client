@@ -17,7 +17,7 @@ trait PriceTickerHelper {
   /**
    * Price ticker actor reference. BitStamp is the default.
    */
-  lazy val priceTicker: ActorRef = priceTicker(BitStamp)
+  lazy val ticker: ActorRef = priceTicker(BitStamp)
 
   /** 
    * Creates a price ticker actor 
@@ -28,7 +28,7 @@ trait PriceTickerHelper {
   /**
    * Get current set price.
    */
-  def priceFuture = ask(priceTicker, GetPrice)(1 second).mapTo[Price]
+  def priceFuture = ask(ticker, GetPrice)(1 second).mapTo[Price]
   
   /**
    * Get current set price.
@@ -38,16 +38,16 @@ trait PriceTickerHelper {
   /**
    * Update price.
    */
-  def tick = priceTicker ! Tick
+  def tick = ticker ! Tick
   
   /**
    * Set percentage over market price.
    */
-  def percentage(profit: Double) = priceTicker ! Percentage(profit)
+  def percentage(profit: Double) = ticker ! Percentage(profit)
   
   /**
    * Change bitcoin service provider.
    */
   def tickerService(service: BitcoinService.Value) = 
-    priceTicker ! ChangeBitcoinService(service)
+    ticker ! ChangeBitcoinService(service)
 }
