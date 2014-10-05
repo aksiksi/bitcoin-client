@@ -1,5 +1,4 @@
 package inc.pyc.bitcoin
-package exchange
 
 import service._
 import akka.actor._

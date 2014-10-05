@@ -1,10 +1,10 @@
 package inc.pyc.bitcoin
 package provider
 
-import exchange._
 import dispatch._
 import akka.actor._
 import net.liftweb.json._
+import inc.pyc.bitcoin.HttpExchange
 
 /**
  * BitStamp REST services
