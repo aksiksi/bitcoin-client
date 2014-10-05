@@ -44,7 +44,6 @@ trait WalletHelper {
   
   def sendRawTransaction(signedTransaction: String) =
     (wallet ? SendRawTransaction(signedTransaction)).mapTo[String]
-
   
   def getBalance: Future[Balance] =
     (wallet ? GetBalance).mapTo[Balance]
