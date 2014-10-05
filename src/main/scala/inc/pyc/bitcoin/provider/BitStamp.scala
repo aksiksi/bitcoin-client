@@ -6,34 +6,27 @@ import dispatch._
 import akka.actor._
 import net.liftweb.json._
 
-
 /**
  * BitStamp REST services
  */
-class BitStamp extends Actor 
+class BitStamp 
+  extends Actor 
   with ActorLogging 
-  with HttpBitcoinExchange {
-    
+  with HttpExchange {
+
   import BitStamp._
-  
-  
+
   implicit val formats = DefaultFormats
-  
-  
+
   def receive = priceTicker
-    
-  
+
   protected val api = :/ ("www.bitstamp.net").secure / "api"
-  
-  
+
   protected val ticker_api = api / "ticker" / ""
-  
-  
+
   protected def buyPrice: String = {
     (request(ticker_api).extract[BitStampPrices]).last
   }
-  
-  
 }
 
 object BitStamp {

@@ -1,8 +1,9 @@
 package inc.pyc.bitcoin
-package service
 
 import net.liftweb._
-import json.JsonAST._
+import net.liftweb.json.JsonAST._
+import scala.math.BigDecimal.int2bigDecimal
+import scala.math.BigInt.int2bigInt
 
 sealed trait JsonMessage
 

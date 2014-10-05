@@ -9,7 +9,7 @@ import akka.actor._
 /**
  * Bitcoin service over HTTP communications.
  */
-trait HttpBitcoinService {
+private[bitcoin] trait HttpService {
   this: Actor with ActorLogging =>
 
   	/**

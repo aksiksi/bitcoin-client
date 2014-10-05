@@ -2,9 +2,7 @@ package inc.pyc.bitcoin
 
 import service._
 import akka.actor.Props
-import inc.pyc.bitcoin.provider.BtcWallet
-import inc.pyc.bitcoin.provider.BlockChain
-import inc.pyc.bitcoin.provider.BitStamp
+import provider._
 
 /**
  * The different choices of bitcoin services.

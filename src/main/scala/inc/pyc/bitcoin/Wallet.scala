@@ -1,5 +1,4 @@
 package inc.pyc.bitcoin
-package wallet
 
 import service._
 import JsonRPC._
@@ -19,51 +18,45 @@ import scala.util.Try
 /**
  * Actor to handle bitcoin wallet communications with JSON-RPC.
  */
-sealed trait BitcoinWallet {
+sealed trait Wallet {
   this: Actor with ActorLogging =>
-        
-    
+
   /** Wallet configuration */
   protected val config: Config
   protected val walletUri: String
   protected val rpcUser: String
   protected val rpcPass: String
   protected val walletPass: String
-  
-  
+
   /**
-   * The wait time for a response. This timeout is also used to set 
+   * The wait time for a response. This timeout is also used to set
    * the timeout for walletpassphrase command.
    */
   protected implicit val timeout: Timeout = 5 seconds
-  
-  
+
   /**
-   * Checks wallet json response. Throws exception if 
+   * Checks wallet json response. Throws exception if
    * response is invalid, else it logs the response.
    */
   protected def checkWalletResponse(json: JsonResponse, method: String = "") {
-    json.either.left.map { 
-      case err => 
-        new RuntimeException("Wallet Command '"+method+"' Failed: " + err) 
+    json.either.left.map {
+      case err =>
+        new RuntimeException("Wallet Command '" + method + "' Failed: " + err)
     }
-    
-    json.either.right.map { 
-      case r => 
+
+    json.either.right.map {
+      case r =>
         implicit val formats = DefaultFormats
-        log.info("\nWallet Command '{}' Success:\n{}", method, pretty(render(Extraction.decompose(r)))) 
+        log.info("\nWallet Command '{}' Success:\n{}", method, pretty(render(Extraction.decompose(r))))
     }
   }
-  
 }
-
-
 
 /**
  * Actor to handle bitcoin wallet communications with JSON-RPC
  * over Http.
  */
-trait HttpBitcoinWallet extends HttpBitcoinService with BitcoinWallet {
+private[bitcoin] trait HttpWallet extends HttpService with Wallet {
   this: Actor with ActorLogging =>
     
   import dispatch._
@@ -105,13 +98,11 @@ trait HttpBitcoinWallet extends HttpBitcoinService with BitcoinWallet {
       val json = JsonMessage.validateAddress(address)
       sender ! requestExtract(json, _.extract[AddressValidation])
   }
-  
-  
-  private def post(msg: JValue): Req = 
-    url(walletUri) <:< Map("Content-type" -> "application/json-rpc") << 
-    	compact(render(msg)) as_!(rpcUser, rpcPass)
-    
-    	
+
+  private def post(msg: JValue): Req =
+    url(walletUri) <:< Map("Content-type" -> "application/json-rpc") <<
+      compact(render(msg)) as_! (rpcUser, rpcPass)
+
   /* All-in-one func: makes request, extracts response, extracts data. */
   private def requestExtract[T](req: JsonRequest, extractor: JValue => T): T = {
     val json = request(post(req)).extract[JsonResponse]
@@ -119,27 +110,23 @@ trait HttpBitcoinWallet extends HttpBitcoinService with BitcoinWallet {
     val result = json.result.getOrElse(JNull)
     extractor(result)
   }
-  
-}
 
+}
 
 /**
  * Actor to handle bitcoin wallet communications with JSON-RPC
  * over WebSocket.
  */
-trait WsBitcoinWallet extends WsBitcoinService with BitcoinWallet {
+private[bitcoin] trait WsWallet extends WsService with Wallet {
   this: Actor with ActorLogging =>
-    
-    
+
   /**
    * Handles notifications incoming from server.
    */
   protected def handleNotification: Receive
-  
-    
+
   override val api = new java.net.URI(walletUri)
-  
-  
+
   val bitcoinWallet: Receive = {
     case CreateRawTransaction(inputs, receivers) =>
       val json = JsonMessage.createRawTransaction(inputs, receivers)
@@ -188,45 +175,42 @@ trait WsBitcoinWallet extends WsBitcoinService with BitcoinWallet {
     case n: NotificationMessage =>
       handleNotification.applyOrElse(n, unhandled)
   }
-  
-  
+
   /*
    * Handles notifications incoming from server.
    */
   private def handleResponseNotification: PartialFunction[JsonNotification, Unit] = {
-    
+
     /* New Transaction */
     case JsonNotification(_, "newtx", params) =>
-      Try(params(1).extract[TransactionNotification]).filter (_.category == "receive"). 
-      	foreach (tx => self ! ReceivedPayment(tx.txid, tx.address, tx.amount, tx.confirmations))
-          
+      Try(params(1).extract[TransactionNotification]).filter(_.category == "receive").
+        foreach(tx => self ! ReceivedPayment(tx.txid, tx.address, tx.amount, tx.confirmations))
+
     case _ => // ignore
   }
-  
-  
+
   override def onMessage(msg: JValue) = () => {
-    
+
     // messages should be either JsonNotification or JsonResponse
     // only notifications have jsonrpc field.
-    def isNotification: Boolean = 
+    def isNotification: Boolean =
       (msg find {
         case JField("jsonrpc", _) => true
         case _ => false
       }).isDefined
-    
-    if(isNotification)
+
+    if (isNotification)
       Try(msg.extract[JsonNotification]).foreach(
-          handleResponseNotification.applyOrElse(_, unhandled))
+        handleResponseNotification.applyOrElse(_, unhandled))
     else
       Try(msg.extract[JsonResponse]).foreach(self ! _)
   }
 }
 
-
 /**
  * Actor to handle bitcoin wallet communications with JSON-RPC
  * over Secure WebSocket.
  */
-trait WssBitcoinWallet extends WssBitcoinService with WsBitcoinWallet {
+private[bitcoin] trait WssWallet extends WssService with WsWallet {
   this: Actor with ActorLogging =>
 }
