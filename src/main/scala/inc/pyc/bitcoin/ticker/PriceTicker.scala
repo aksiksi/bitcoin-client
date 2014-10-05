@@ -18,9 +18,7 @@ class PriceTicker(service: BitcoinService.Value) extends BitcoinActorInterface(s
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
       case _: java.net.ConnectException => Resume
-      case t =>
-        super.supervisorStrategy.decider.
-        	applyOrElse(t, (_: Any) => Escalate)
+      case _: Exception => Escalate
     }
   
   implicit val timeout = Timeout(4 seconds)

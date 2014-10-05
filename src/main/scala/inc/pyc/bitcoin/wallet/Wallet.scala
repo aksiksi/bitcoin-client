@@ -22,8 +22,7 @@ class Wallet(service: BitcoinService.Value) extends BitcoinActorInterface(servic
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
       case _: java.net.ConnectException => Resume
-      case t =>
-        super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
+      case _: Exception => Escalate
     }
   
   implicit val timeout = Timeout(5 seconds)
