@@ -12,9 +12,7 @@ object BitcoinService extends Enumeration {
   val BitStamp, BlockChain, BtcWallet = Value
   
   def props(serv: BitcoinService): Props = props(fqcn(serv))
-  def props(serv: BitcoinService, name: String): Props = props(fqcn(serv), name)
   def props(fqcn: String): Props = Props(Class forName fqcn)
-  def props(fqcn: String, name: String): Props = Props(Class forName fqcn, name)
 
   /**
    * All bitcoin services that have a price ticker.
