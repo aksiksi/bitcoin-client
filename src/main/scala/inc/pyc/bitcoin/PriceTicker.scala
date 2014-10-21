@@ -47,7 +47,8 @@ case class Price(price: Double, percentage: Double = 0) {
    * Formats the over market price with percentage.
    */
   def priceWithPercentage: Double = {
-    price + (price * (percentage * 0.01))
+    val ans = price + (price * (percentage * 0.01))
+    math ceil (ans * 100) / 100
   }
 }
 
