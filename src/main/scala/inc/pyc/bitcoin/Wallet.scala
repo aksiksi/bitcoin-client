@@ -47,7 +47,7 @@ sealed trait Wallet {
     json.either.right.map {
       case r =>
         implicit val formats = DefaultFormats
-        log.info("\nWallet Command '{}' Success:\n{}", method, pretty(render(Extraction.decompose(r))))
+        log.debug("\nWallet Command '{}' Success:\n{}", method, pretty(render(Extraction.decompose(r))))
     }
   }
 }
